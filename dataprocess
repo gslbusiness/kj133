@@ -1,0 +1,50 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jul 16 19:57:34 2016
+
+@author: Administrator
+"""
+
+import time
+import os
+import pandas as pd
+import numpy as np
+from pandas import DataFrame
+
+path='C:/Users/Administrator/Desktop/入井记录导出/基础数据'
+dirs=os.listdir(path)
+
+
+def get_info(mulu):
+    data=DataFrame()
+    path_mulu=path+'/'+mulu
+    danwei=os.listdir(path_mulu)
+    date=mulu[0:4]+'/'+mulu[4:6]+'/01'
+    for j in danwei:
+        print(j.split('.')[0])
+        df=pd.read_excel(path_mulu+'/'+j)
+        try:
+            df['入井总时长']=df['平均时长']*df['出勤数']
+            df['单位']=j.split('.')[0]
+            df['日期']=date
+            data=data.append(df)
+        except:
+            print('无内容')
+    return data
+data_main=DataFrame()
+for i in dirs:
+    print('正在处理'+i[0:6])
+    data_main=data_main.append(get_info(i))
+    
+data_main.to_csv(path+'/数据汇总.csv')
+
+data=data_main[['日期','单位','部门','岗位','姓名','出勤数','入井总时长']]
+data.to_csv(path+'/数据汇总3.csv')
+df=pd.pivot_table(data,index=["单位"],columns=["日期"],values=["入井总时长"],aggfunc=np.sum,fill_value=0)
+df.to_csv(path+'/数据汇总2.csv')
+df=pd.pivot_table(data,index=["单位","日期"],values=["入井总时长"],aggfunc=np.sum,fill_value=0)
+df.to_csv(path+'/数据汇总2.csv')
+
+
+
+
